@@ -1,0 +1,167 @@
+**TASK C**: Graphical Analysis
+
+**Data Import)**
+```{r}
+#' @author Jamil Quarless
+#'@title Importing *GSE75748_sc_cell_type_ec* dataset
+
+#Using read.table() to import data and classify the artifacts; descerned the data seperations and indicated the header and row names found in the data
+GSE75748_sc_cell_type_ec <- read.table("C:/Users/Jamil/Downloads/University/Assignment/GSE75748_sc_cell_type_ec.csv",header=TRUE,sep=",",row.names=1)
+
+#Dataframe consisting of H1 and H9 cells
+embdata <- GSE75748_sc_cell_type_ec[,1:374]
+
+```
+
+**A)** Produces a Histogram expressing the total expression of genes in cell
+```{r}
+#' @title Creating a function called *histogramExpressionLevelsForCell*.
+#'
+#' @description Produces a Histogram expressing the total expression of genes in cell.
+#'
+#' @param data The data frame with the expression values
+#' @param col column containing a cell's FPKM
+#' @param h contains a cell's expression levels in numerical format, excluding nodes with zero
+#' @return Histogram showcasing expression level frequency
+#'
+#' @examples
+
+histogramExpressionLevelsForCell <- function(data,col){
+ 
+#configures a list consisting of a column's expression levels excluding frames containing zero   
+  h<-as.numeric(data$col[!data$col== 0])
+  
+#Outputs a histogram with FPKM levels of 0 < 1000 
+  T1 <- hist(h,breaks = 1000, xlim = c(0,1000), ylim = c(0,2000), col = c("red"),
+               main = c(col,"Gene Expression"),xlab = "Expression level")
+  return(T1)
+}
+#'@function histogramExpressionLevelsForCell(embdata,H1_Exp1.001)
+```
+
+**B)** Quantifies the net expression of genes found in H1 and H9 cells and compiles it into a boxplot
+```{r}
+#' @title *boxplotExpressionLevelsForCells* function.
+#'
+#' @description Utilising the dataset, the function produces a boxplot comparing total expression levels found between H1 and H9 cells.
+#'
+#' @param data The data frame with the expression values
+#' @param H1 The extracted data that contains only H1 cells
+#' @param H9 The extracted data that contains only H9 cells
+#' @param H1s Summarised expression levels found in H1 cells
+#' @param H9s Summarised expression levels found in H9 cells
+#' @param box contains H1s and H9s values with respective labelling
+#' @return Boxplot comparing H1 and H9 cells
+#'
+#' @examples
+
+boxplotExpressionLevelsForCells <- function(data,H1,H9){
+  
+  #Seperates the cell types into two dataframes
+    H1 <- data[,1:212]
+    H9 <- data[,213:374]
+    
+  #summarises the gross expression levels found in a single cell trial  
+    H1s <- colSums(H1)
+    H9s <- colSums(H9)
+    
+  #allocates the dataset titles
+    box<-list("H1" = H1s,"H9" = H9s)
+    
+  #Produces a boxplot depicting the upper and lower quartile values as well as median and stray results. 
+    T2<- boxplot(box,col = c("red","yellow"),
+                   xlab = "Cells",ylab = "Total gene expression",
+                   main = "Gene expression of H1 and H9 Cells",plot = TRUE)
+  
+    return(T2)
+  
+  }
+#'@function boxplotExpressionLevelsForCells(embdata,H1,H9)
+```
+**C)** Utilising expression levels of a gene to create a scattergraph composed of H1 levels against H9
+```{r}
+#' @title Creating a function called *plotExpressionLevelsForGene*.
+#'
+#' @description Utilises the expression levels of a given gene to create a scattergraph composed of H1 levels against H9.
+#'
+#' @param data The data frame with the expression values
+#' @param H1 The extracted data that contains only H1 cells
+#' @param H9 The extracted data that contains only H9 cells
+#' @param H1d convertion of H1 dataframe into numerical list
+#' @param H9d convertion of H9 dataframe into numerical list
+#' @param Gene Specified gene 
+#' @return Scatter plot showcasing H1 cells against H9
+#'
+#' @examples
+
+plotExpressionLevelsForGene <- function(data,H1,H9,Gene){
+
+#Formulates two datasets consisting of the expression levels from a given gene across the two sets of hESC cell trials  
+  H1d <- as.numeric(data[Gene,1:162])
+  H9d <- as.numeric(data[Gene,213:374])
+  
+  
+#Scattergraph that plots H1 cells expressions against H9, configured to output gene as part of graph title  
+  T3 <<- plot(H1d,H9d,main = c(Gene,"Expression"), ylab = "H9 Gene expression",
+       xlab = "H1 Gene expression", 
+       xlim = c(0,100),ylim = c(0,100), pch = 5, col = c("violet","red"))
+  
+       
+  return(T3)
+}
+#'@function plotExpressionLevelsForGene(embdata,H1,H9,"MKL2")
+```
+**EXTENSION)** Takes the inputed data and create a mosiac of graphs relating to the data and exports it as a PDF
+
+```{r}
+#' @title Creating a function called *Export*.
+#'
+#' @description This function produces a PDF file contain a histogram,boxplot and scatter plot of the data inputted.
+#'
+#' @param data The data frame with the expression values
+#' @param H1 The extracted data that contains only H1 cells
+#' @param H9 The extracted data that contains only H9 cells
+#' @param H1d convertion of dataframe into numerical list
+#' @param H9d convertion of dataframe into numerical list
+#' @param data The data frame with the expression values
+#' @param H1 The extracted data that contains only H1 cells
+#' @param H9 The extracted data that contains only H9 cells
+#' @param H1s Summarised expression levels found in H1 cells
+#' @param H9s Summarised expression levels found in H9 cells
+#' @param box contains H1s and H9s values with respective labelling
+#' @param Gene Specified gene
+#' @param data The data frame with the expression values
+#' @param col column containing a cells FPKM
+#' @param h contains a cells expression levels in numerical format, excluding nodes with zero
+#' @return Combined graph array in a PDF format
+#'
+#' @examples
+
+Export<- function(data,col,Gene){
+
+#Functions developed in the previous tasks
+  #T1  
+h<-as.numeric(data$col[!data$col == 0])
+  #T2
+H1 <- data[,1:212]
+H9 <- data[,213:374]
+H1s <- colSums(H1)
+H9s <- colSums(H9)
+box<-list("H1" = H1s,"H9" = H9s)
+  #T3
+H1d <- as.numeric(data[Gene,1:162])
+H9d <- as.numeric(data[Gene,213:374])
+
+#Creates a PDF related to the data inputed into the function
+pdf("hESC_Graphs.pdf", width = 9, height = 6)
+layout(matrix(c(1,1,2,3), nrow=2, ncol=2,byrow = TRUE))
+par(mar=c(4,2,1,1)); hist(h,breaks = 1000, xlim = c(100,1000), ylim = c(0,2000), col = c("red"),
+                         main = "Gene Expression",xlab = "Expression level") ;
+                    boxplot(box,col = c("red","yellow"),xlab = "Cells",ylab = "Total gene expression",
+                         main = "Gene expression of H1 and H9 Cells",plot = TRUE) ;
+                    plot(H1d,H9d,main = c(Gene,"Expression"), ylab = "H9 Gene expression",
+                         xlab = "H1 Gene expression", xlim = c(0,100),ylim = c(0,100), pch = 5, col = c("violet","red"))
+dev.off()
+}
+
+#'@function Export(embdata,H9_BATCH2.157,"KAT5")
